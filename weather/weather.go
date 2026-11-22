@@ -2,14 +2,23 @@ package weather
 
 import "fmt"
 
+var Postaje = map[string]Postaja{}
+
 type Postaja struct {
 	ime     string
 	kraj    string
 	meritve []float64
 }
 
-func dodajMeritev(postaje map[string]Postaja, oznaka string, temperatura float64) {
-	if -50 < temperatura && temperatura < 50 {
+func DodajPostajo(oznaka string, ime string, kraj string, meritve []float64) {
+	Postaje[oznaka] = Postaja{
+		ime:     ime,
+		kraj:    kraj,
+		meritve: []float64{},
+	}
+}
+func DodajMeritev(postaje map[string]Postaja, oznaka string, temperatura, minTemp, maxTemp float64) {
+	if minTemp < temperatura && temperatura < maxTemp {
 		if x, ok := postaje[oznaka]; ok {
 			x.meritve = append(x.meritve, temperatura)
 			postaje[oznaka] = x
@@ -20,8 +29,8 @@ func dodajMeritev(postaje map[string]Postaja, oznaka string, temperatura float64
 		fmt.Println("Temperatura ni veljavna")
 	}
 }
-func statistika(postaje map[string]Postaja, oznaka string) (najnizja, najvisja, povprecna float64, ok bool) {
-	if len(postaje[oznaka].meritve) < 3 {
+func statistika(postaje map[string]Postaja, oznaka string, stMeritev int) (najnizja, najvisja, povprecna float64, ok bool) {
+	if len(postaje[oznaka].meritve) < stMeritev {
 		return 0.0, 0.0, 0.0, false
 	}
 	var min, max, avg float64 = postaje[oznaka].meritve[0], postaje[oznaka].meritve[0], 0
@@ -36,16 +45,16 @@ func statistika(postaje map[string]Postaja, oznaka string) (najnizja, najvisja, 
 	}
 	return min, max, avg / float64(len(postaje[oznaka].meritve)), true
 }
-func izpisMeritev(postaje map[string]Postaja) {
+func IzpisMeritev(postaje map[string]Postaja) {
 	for oznaka, x := range postaje {
 		//fmt.Println(oznaka, " - ", x.ime, "(", x.kraj, "): ", x.meritve)
 		fmt.Printf("%s  -  %s ( %s ):  %g\n", oznaka, x.ime, x.kraj, x.meritve)
 	}
 }
-func izpisPorocila(postaje map[string]Postaja) {
+func IzpisPorocila(postaje map[string]Postaja, stMeritev int) {
 	tmp := " "
 	for oznaka, x := range postaje {
-		min, max, avg, ok := statistika(postaje, oznaka)
+		min, max, avg, ok := statistika(postaje, oznaka, stMeritev)
 		if !ok {
 			fmt.Println("Premalo meritev")
 		} else {
