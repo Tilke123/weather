@@ -12,32 +12,28 @@ import (
 )
 
 func main() {
-	if err := cmd().Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
-	}
-}
-func cmd() *cli.Command {
-	return &cli.Command{
+	cmd := &cli.Command{
 		Name:  "weather",
-		Usage: "beleženje temperaturnih meritev vremenskih postaj",
+		Usage: "weather beleži temperature postaj",
 		Flags: []cli.Flag{
 			&cli.FloatFlag{
 				Name:  "minTemp",
+				Usage: "najnižja dovoljena temperatura",
 				Value: -50,
-				Usage: "najnižja dovoljena temperatura meritve v °C",
 			},
 			&cli.FloatFlag{
 				Name:  "maxTemp",
+				Usage: "najvišja dovoljena temperatura",
 				Value: 50,
-				Usage: "najvišja dovoljena temperatura meritve v °C",
 			},
 			&cli.IntFlag{
 				Name:  "stMeritev",
+				Usage: "najmanjše število meritev",
 				Value: 3,
-				Usage: "najmanjše število meritev za izračun statistike",
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
+
 			minTemp := c.Float("minTemp")
 			maxTemp := c.Float("maxTemp")
 			stMeritev := c.Int("stMeritev")
@@ -48,21 +44,22 @@ func cmd() *cli.Command {
 			if stMeritev < 1 {
 				return fmt.Errorf("stMeritev mora biti vsaj 1")
 			}
-
 			zazeni(minTemp, maxTemp, stMeritev)
 			return nil
 		},
 	}
+
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
 
-// zazeni ustvari postaje, doda meritve in izpiše rezultate.
 func zazeni(minTemp, maxTemp float64, stMeritev int) {
-	postaje := make(map[string]weather.Postaja)
 
-	weather.DodajPostajo(postaje, "KP01", "Koper Luka", "Koper")
-	weather.DodajPostajo(postaje, "KR01", "Kredarica", "Triglav")
-	weather.DodajPostajo(postaje, "LJ01", "Ljubljana Bežigrad", "Ljubljana")
-	weather.DodajPostajo(postaje, "MB01", "Maribor Tabor", "Maribor")
+	weather.DodajPostajo("KP01", "Koper Luka", "Koper")
+	weather.DodajPostajo("KR01", "Kredarica", "Triglav")
+	weather.DodajPostajo("LJ01", "Ljubljana Bežigrad", "Ljubljana")
+	weather.DodajPostajo("MB01", "Maribor Tabor", "Maribor")
 
 	meritve := map[string][]float64{
 		"KP01": {24.5, 27, 26.1, 28.4},
@@ -71,18 +68,21 @@ func zazeni(minTemp, maxTemp float64, stMeritev int) {
 		"MB01": {12.4},
 	}
 	for oznaka, temperature := range meritve {
-		for _, t := range temperature {
-			weather.DodajMeritev(postaje, oznaka, t, minTemp, maxTemp)
+		for _, temp := range temperature {
+			weather.DodajMeritev(oznaka, temp, minTemp, maxTemp)
 		}
 	}
 
-	// primeri neveljavnih meritev
-	weather.DodajMeritev(postaje, "LJ01", 65, minTemp, maxTemp) // previsoka temperatura
-	weather.DodajMeritev(postaje, "PT33", 20, minTemp, maxTemp) // postaja ne obstaja
+	weather.DodajMeritev("LJ01", 65, minTemp, maxTemp)
+	weather.DodajMeritev("PT33", 20, minTemp, maxTemp)
+	weather.DodajMeritev("MB01", 20, minTemp, maxTemp)
+	weather.DodajMeritev("MB01", 25, minTemp, maxTemp)
 
-	fmt.Println("\nMeritve:")
-	weather.IzpisMeritev(postaje)
+	fmt.Println()
+	fmt.Println("Meritve:")
+	weather.IzpisMeritev()
 
-	fmt.Println("\nPoročilo:")
-	weather.IzpisPorocila(postaje, stMeritev)
+	fmt.Println()
+	fmt.Println("Poročilo:")
+	weather.IzpisPorocila(stMeritev)
 }

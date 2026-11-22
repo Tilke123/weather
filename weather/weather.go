@@ -16,11 +16,11 @@ func DodajPostajo(oznaka string, ime string, kraj string) {
 		kraj: kraj,
 	}
 }
-func DodajMeritev(postaje map[string]Postaja, oznaka string, temperatura, minTemp, maxTemp float64) {
+func DodajMeritev(oznaka string, temperatura, minTemp, maxTemp float64) {
 	if minTemp < temperatura && temperatura < maxTemp {
-		if x, ok := postaje[oznaka]; ok {
+		if x, ok := Postaje[oznaka]; ok {
 			x.meritve = append(x.meritve, temperatura)
-			postaje[oznaka] = x
+			Postaje[oznaka] = x
 		} else {
 			fmt.Println("Postaja ni veljavna")
 		}
@@ -28,12 +28,12 @@ func DodajMeritev(postaje map[string]Postaja, oznaka string, temperatura, minTem
 		fmt.Println("Temperatura ni veljavna")
 	}
 }
-func statistika(postaje map[string]Postaja, oznaka string, stMeritev int) (najnizja, najvisja, povprecna float64, ok bool) {
-	if len(postaje[oznaka].meritve) < stMeritev {
+func statistika(oznaka string, stMeritev int) (najnizja, najvisja, povprecna float64, ok bool) {
+	if len(Postaje[oznaka].meritve) < stMeritev {
 		return 0.0, 0.0, 0.0, false
 	}
-	var min, max, avg float64 = postaje[oznaka].meritve[0], postaje[oznaka].meritve[0], 0
-	for _, x := range postaje[oznaka].meritve {
+	var min, max, avg float64 = Postaje[oznaka].meritve[0], Postaje[oznaka].meritve[0], 0
+	for _, x := range Postaje[oznaka].meritve {
 		avg += x
 		if min > x {
 			min = x
@@ -42,18 +42,18 @@ func statistika(postaje map[string]Postaja, oznaka string, stMeritev int) (najni
 			max = x
 		}
 	}
-	return min, max, avg / float64(len(postaje[oznaka].meritve)), true
+	return min, max, avg / float64(len(Postaje[oznaka].meritve)), true
 }
-func IzpisMeritev(postaje map[string]Postaja) {
-	for oznaka, x := range postaje {
+func IzpisMeritev() {
+	for oznaka, x := range Postaje {
 		//fmt.Println(oznaka, " - ", x.ime, "(", x.kraj, "): ", x.meritve)
 		fmt.Printf("%s  -  %s ( %s ):  %g\n", oznaka, x.ime, x.kraj, x.meritve)
 	}
 }
-func IzpisPorocila(postaje map[string]Postaja, stMeritev int) {
+func IzpisPorocila(stMeritev int) {
 	tmp := " "
-	for oznaka, x := range postaje {
-		min, max, avg, ok := statistika(postaje, oznaka, stMeritev)
+	for oznaka, x := range Postaje {
+		min, max, avg, ok := statistika(oznaka, stMeritev)
 		if !ok {
 			fmt.Println("Premalo meritev")
 		} else {
