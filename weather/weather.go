@@ -10,11 +10,10 @@ type Postaja struct {
 	meritve []float64
 }
 
-func DodajPostajo(oznaka string, ime string, kraj string, meritve []float64) {
+func DodajPostajo(oznaka string, ime string, kraj string) {
 	Postaje[oznaka] = Postaja{
-		ime:     ime,
-		kraj:    kraj,
-		meritve: []float64{},
+		ime:  ime,
+		kraj: kraj,
 	}
 }
 func DodajMeritev(postaje map[string]Postaja, oznaka string, temperatura, minTemp, maxTemp float64) {
